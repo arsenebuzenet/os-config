@@ -1,38 +1,36 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-SCHEMA="org.gnome.settings-daemon.plugins.media-keys"
-KEY_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
-BINDING="<Control><Alt>t"
-COMMAND="gnome-terminal --working-directory=$HOME"
+# Script to add Ctrl+Alt+T shortcut for opening terminal in Fedora 43
+# This configures GNOME's custom keyboard shortcuts
 
-# Get existing custom keybindings
-EXISTING=$(gsettings get $SCHEMA custom-keybindings)
+echo "Adding Ctrl+Alt+T keyboard shortcut to open terminal..."
 
-# Convert to Bash array safely
-EXISTING_ARRAY=()
-# Remove [ ] and split by comma
-for item in ${EXISTING//[\[\]\'\ ]/}; do
-    [[ -n "$item" ]] && EXISTING_ARRAY+=("$item")
-done
+# Get the current list of custom keybindings
+CUSTOM_KEYBINDINGS=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
 
-# Add custom0 if not already present
-if [[ ! " ${EXISTING_ARRAY[@]} " =~ " ${KEY_PATH} " ]]; then
-    EXISTING_ARRAY+=("$KEY_PATH")
+# Define the new keybinding path
+NEW_BINDING="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+
+# Check if custom0 already exists in the list
+if [[ $CUSTOM_KEYBINDINGS == *"custom0"* ]]; then
+    echo "Warning: custom0 keybinding already exists. Using it anyway..."
+    # You might want to use a different number like custom1, custom2, etc.
 fi
 
-# Rebuild GNOME list format
-NEW_LIST="["
-for item in "${EXISTING_ARRAY[@]}"; do
-    NEW_LIST+="'$item', "
-done
-NEW_LIST="${NEW_LIST%, }]"  # remove trailing comma
+# Add the new binding to the list if not already there
+if [[ $CUSTOM_KEYBINDINGS == "@as []" ]] || [[ $CUSTOM_KEYBINDINGS == "[]" ]]; then
+    # List is empty
+    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$NEW_BINDING']"
+elif [[ $CUSTOM_KEYBINDINGS != *"$NEW_BINDING"* ]]; then
+    # Add to existing list
+    NEW_LIST=$(echo $CUSTOM_KEYBINDINGS | sed "s/]/, '$NEW_BINDING']/")
+    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$NEW_LIST"
+fi
 
-# Apply the new list
-gsettings set $SCHEMA custom-keybindings "$NEW_LIST"
+# Set the name, command, and binding for the new shortcut
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$NEW_BINDING name "Open Terminal"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$NEW_BINDING command "ptyxis"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$NEW_BINDING binding "<Primary><Alt>t"
 
-# Set the shortcut properties
-gsettings set $SCHEMA.custom-keybinding:$KEY_PATH name "Terminal"
-gsettings set $SCHEMA.custom-keybinding:$KEY_PATH command "$COMMAND"
-gsettings set $SCHEMA.custom-keybinding:$KEY_PATH binding "$BINDING"
-
-echo "Ctrl+Alt+T shortcut added"
+echo "Done! Ctrl+Alt+T is now configured to open the terminal."
+echo "The shortcut should work immediately without requiring a logout."
