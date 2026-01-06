@@ -18,14 +18,18 @@ need_reboot()
 	if [[ ${DNFVERSION} == "dnf-3" ]]
 	then
 		needs-restarting -r >> "$LOGFILE" 2>&1
-		NEEDRESTART="$?"
+		if [[ $? -eq 0 ]]; then
+			return 1  # reboot needed
+		fi
 	fi
 	if [[ ${DNFVERSION} == "dnf5" ]]
 	then
 		dnf needs-restarting -r >> "$LOGFILE" 2>&1
-		NEEDRESTART="$?"
+		if [[ $? -eq 0 ]]; then
+			return 1  # reboot needed
+		fi
 	fi
-	return $NEEDRESTART
+	return 0  # no reboot needed
 }
 
 ask_reboot()
@@ -80,7 +84,7 @@ add_pkg()
 
 add_flatpak()
 {
-	flatpak install flathub --noninteractive -y "$1" >> "$LOGFILE" 2>&1
+	timeout 300 flatpak install flathub --noninteractive -y "$1" >> "$LOGFILE" 2>&1
 }
 
 #################
@@ -140,7 +144,7 @@ dnf upgrade -y >> "$LOGFILE"  2>&1
 check_cmd
 
 # Check if reboot is needed
-if ! need_reboot
+if need_reboot
 then
     ask_reboot
 fi
@@ -294,7 +298,7 @@ echo "12- TODO Manually"
 echo "- Import vs code profile"
 echo "- Add Zen-browser accounts and extension"
 
-if ! need_reboot
+if need_reboot
 then
 	ask_reboot
 fi
