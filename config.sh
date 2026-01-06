@@ -246,8 +246,8 @@ echo -n "- - - Install VLC : "
 add_pkg vlc
 check_cmd
 
-echo -n "- - - Install nano : "
-add_pkg nano
+echo -n "- - - Install micro : "
+add_pkg micro
 check_cmd
 
 echo -n "- - - Install Bruno : "
