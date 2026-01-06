@@ -262,6 +262,13 @@ echo -n "- - - Add shortcuts : "
 bash ./conf_shortcuts.sh >> "$LOGFILE" 2>&1
 check_cmd
 
+echo -n "- - - Configuring Caps Lock for numbers : "
+FR_SYMBOLS="/usr/share/X11/xkb/symbols/fr"
+if ! grep -q 'include "mswindows-capslock"' "$FR_SYMBOLS"; then
+    sed -i '/include "latin"/a\    include "mswindows-capslock"' "$FR_SYMBOLS" >> "$LOGFILE" 2>&1
+fi
+check_cmd
+
 echo -n "- - - Enabling sudo password feedback (*) : "
 FILE="/etc/sudoers.d/pwfeedback"
 echo "Defaults pwfeedback" | sudo tee "$FILE" && sudo chmod 440 "$FILE" > /dev/null 2>&1
