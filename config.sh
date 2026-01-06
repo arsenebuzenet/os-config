@@ -242,13 +242,16 @@ echo -n "- - - Install VLC : "
 add_pkg vlc
 check_cmd
 
+echo -n "- - - Install nano : "
+add_pkg nano
+check_cmd
+
 echo -n "- - - Install Bruno : "
 add_flatpak com.usebruno.Bruno
 check_cmd
 
 echo -n "- - - Install Zen Browser : "
 add_flatpak app.zen_browser.zen
-
 check_cmd
 
 ### System config
