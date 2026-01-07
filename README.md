@@ -48,7 +48,7 @@ The `fedora_setup.sh` script automates the complete setup of a fresh Fedora inst
 
 - **`fedora_setup.sh`** - Main setup script that handles all system configuration and package installation
 - **`conf_dns.sh`** - Configures Quad9 DNS servers (privacy-focused DNS service)
-- **`conf_shortcuts.sh`** - Sets up custom keyboard shortcuts (Ctrl+Alt+T for terminal)
+- **`conf_keyboard.sh`** - Sets up custom keyboard shortcuts and keyboard params.
 - **`test.sh`** - Testing utilities for the setup
 
 ## What's Installed
@@ -75,6 +75,7 @@ The `fedora_setup.sh` script automates the complete setup of a fresh Fedora inst
 ### Applications
 - **VSCodium** - Open-source code editor (from official repository)
 - **VLC** - Multimedia player
+- **Micro** - Command line text editor
 - **Bruno** (Flatpak) - API testing tool
 - **Zen Browser** (Flatpak) - Privacy-focused web browser
 
