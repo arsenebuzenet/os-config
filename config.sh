@@ -87,6 +87,23 @@ add_flatpak()
 	timeout 300 flatpak install flathub --noninteractive -y "$1" >> "$LOGFILE" 2>&1
 }
 
+install_nvm() {
+    USER_HOME=$(eval echo ~$SUDO_USER)
+
+    # Get the latest NVM version
+    LATEST_VERSION=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | jq -r .tag_name)
+
+    # Install NVM for the user
+    sudo -u $SUDO_USER bash -c "
+        export NVM_DIR=\"$USER_HOME/.nvm\"
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$LATEST_VERSION/install.sh | bash
+        echo 'export NVM_DIR=\"$USER_HOME/.nvm\"' >> $USER_HOME/.bashrc
+        echo '[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"' >> $USER_HOME/.bashrc
+        echo '[ -s \"$NVM_DIR/bash_completion\" ] && . \"$NVM_DIR/bash_completion\"' >> $USER_HOME/.bashrc
+    "
+    echo "NVM installed for user $SUDO_USER"
+}
+
 #################
 # MAIN
 #################
@@ -258,6 +275,14 @@ echo -n "- - - Install Zen Browser : "
 add_flatpak app.zen_browser.zen
 check_cmd
 
+echo -n "- - - Install nvm : "
+install_nvm
+check_cmd
+
+echo -n "- - - Install last lts node version : "
+sudo runuser -l $SUDO_USER -c 'echo $USER && nvm install --lts'
+check_cmd
+
 ### System config
 echo "10- Configuring system"
 
@@ -265,15 +290,8 @@ echo -n "- - - Configuring dns : "
 bash ./conf_dns.sh >> "$LOGFILE" 2>&1
 check_cmd
 
-echo -n "- - - Add shortcuts : "
-bash ./conf_shortcuts.sh >> "$LOGFILE" 2>&1
-check_cmd
-
-echo -n "- - - Configuring Caps Lock for numbers : "
-FR_SYMBOLS="/usr/share/X11/xkb/symbols/fr"
-if ! grep -q 'include "mswindows-capslock"' "$FR_SYMBOLS"; then
-    sed -i '/include "latin"/a\    include "mswindows-capslock"' "$FR_SYMBOLS" >> "$LOGFILE" 2>&1
-fi
+echo -n "- - - Add keyboard and shortcuts : "
+bash ./conf_keyboard.sh >> "$LOGFILE" 2>&1
 check_cmd
 
 echo -n "- - - Enabling sudo password feedback (*) : "
